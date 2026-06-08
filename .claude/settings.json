@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(D:\\\\flutter_windows_3.44.1-stable\\\\flutter\\\\bin\\\\flutter.bat doctor 2>&1)"
+    ]
+  }
+}

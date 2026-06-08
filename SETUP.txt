@@ -1,0 +1,44 @@
+== 魔方钢珠迷宫 Flutter 游戏 ==
+
+=== 运行步骤 ===
+
+1. 安装 Flutter SDK (https://docs.flutter.dev/get-started/install/windows/mobile)
+
+2. 在本目录运行以下命令生成平台文件：
+
+   flutter create . --project-name cube_maze
+
+3. 安装依赖：
+
+   flutter pub get
+
+4. 运行游戏：
+
+   flutter run
+
+=== 项目结构 ===
+
+lib/
+  main.dart               - 入口
+  models/                 - 数据模型 (GameCube, CubeBlock, GameState)
+  services/               - 重力计算、关卡加载
+  providers/              - Riverpod 状态管理
+  rendering/              - CustomPainter 3D 等轴测渲染
+  widgets/                - 界面组件
+  utils/                  - 工具类 (坐标、弧球旋转)
+
+assets/levels/            - 9个关卡 JSON (level_001 ~ level_009)
+
+=== 玩法 ===
+
+- 拖动屏幕旋转魔方
+- 松手后，钢珠根据重力方向沿管道滚动一步
+- 目标：从绿色角落 (0,0,0) 滚到金色角落 (3,3,3)
+- 共9关，难度递增
+
+=== Face Mask 编码（用于添加关卡）===
+
+top=0x01  bottom=0x02  right=0x04  left=0x08  front=0x10  back=0x20
+
+两格相邻且都有对应面的 mask 才会连通，例如：
+- A(right=0x04) 和 B(left=0x08) 相邻且都有对应面 -> 连通 ✓
