@@ -34,6 +34,7 @@ class CubePainter extends CustomPainter {
       for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
           final c = Coordinate(x, y, z);
+          if (cube.at(c).isEmpty) continue;
           final worldPos = _cellWorld(x, y, z);
           final rotated = orientation.rotate(worldPos);
           cells.add(_CellEntry(c, rotated.z));
@@ -62,27 +63,26 @@ class CubePainter extends CustomPainter {
   // 8 unit-cube corner offsets (local space, centered on origin)
   static final List<List<double>> _cornerOffsets = [
     [-0.5, -0.5, -0.5], // 0
-    [ 0.5, -0.5, -0.5], // 1
-    [-0.5,  0.5, -0.5], // 2
-    [ 0.5,  0.5, -0.5], // 3
-    [-0.5, -0.5,  0.5], // 4
-    [ 0.5, -0.5,  0.5], // 5
-    [-0.5,  0.5,  0.5], // 6
-    [ 0.5,  0.5,  0.5], // 7
+    [0.5, -0.5, -0.5], // 1
+    [-0.5, 0.5, -0.5], // 2
+    [0.5, 0.5, -0.5], // 3
+    [-0.5, -0.5, 0.5], // 4
+    [0.5, -0.5, 0.5], // 5
+    [-0.5, 0.5, 0.5], // 6
+    [0.5, 0.5, 0.5], // 7
   ];
 
   // Each face: (Face, outward normal vector, 4 corner indices)
   static final _faceSpecs = <(Face, List<double>, List<int>)>[
-    (Face.top,    [ 0.0,  1.0,  0.0], [2, 3, 7, 6]),
-    (Face.bottom, [ 0.0, -1.0,  0.0], [4, 5, 1, 0]),
-    (Face.right,  [ 1.0,  0.0,  0.0], [1, 5, 7, 3]),
-    (Face.left,   [-1.0,  0.0,  0.0], [4, 0, 2, 6]),
-    (Face.front,  [ 0.0,  0.0,  1.0], [4, 5, 7, 6]),
-    (Face.back,   [ 0.0,  0.0, -1.0], [0, 1, 3, 2]),
+    (Face.top, [0.0, 1.0, 0.0], [2, 3, 7, 6]),
+    (Face.bottom, [0.0, -1.0, 0.0], [4, 5, 1, 0]),
+    (Face.right, [1.0, 0.0, 0.0], [1, 5, 7, 3]),
+    (Face.left, [-1.0, 0.0, 0.0], [4, 0, 2, 6]),
+    (Face.front, [0.0, 0.0, 1.0], [4, 5, 7, 6]),
+    (Face.back, [0.0, 0.0, -1.0], [0, 1, 3, 2]),
   ];
 
-  void _drawCell(
-      Canvas canvas, Coordinate c, Vector3 viewDir, Offset center) {
+  void _drawCell(Canvas canvas, Coordinate c, Vector3 viewDir, Offset center) {
     final block = cube.at(c);
     final isTraveled = traveledPath.contains(c);
     final isStart = c == kStart;
@@ -105,6 +105,7 @@ class CubePainter extends CustomPainter {
 
     for (final spec in _faceSpecs) {
       final (face, normalArr, cornerIdx) = spec;
+
       final normal = Vector3(normalArr[0], normalArr[1], normalArr[2]);
       // Back-face cull
       if (normal.dot(viewDir) <= 0.02) continue;
@@ -123,28 +124,24 @@ class CubePainter extends CustomPainter {
         faceColor = Colors.lightGreenAccent.withOpacity(0.55);
       } else if (isEnd) {
         faceColor = Colors.amber.withOpacity(0.55);
-      } else if (block.isEmpty) {
-        faceColor = Colors.blueGrey.shade900.withOpacity(0.20);
       } else if (isTraveled) {
         faceColor = Colors.deepOrange.withOpacity(0.45);
       } else {
         faceColor = HSLColor.fromAHSL(0.68, 215, 0.55, brightness).toColor();
       }
 
-      canvas.drawPath(path, Paint()..color = faceColor);
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = Colors.white.withOpacity(0.12)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.6,
-      );
+      canvas.drawPath(path, Paint()..color = faceColor.withOpacity(0.38));
 
       // Pipe opening on this face
-      if (!block.isEmpty && block.connectsTo(face)) {
+      if (block.connectsTo(face)) {
         final fc =
             pts.fold(Offset.zero, (a, b) => a + b) / pts.length.toDouble();
-        _drawPipeOpening(canvas, fc, isTraveled || isStart || isEnd, block.connectionCount);
+        _drawPipeOpening(
+          canvas,
+          fc,
+          isTraveled || isStart || isEnd,
+          block.connectionCount,
+        );
       }
     }
   }
@@ -193,7 +190,8 @@ class CubePainter extends CustomPainter {
     );
 
     final rect = Rect.fromCircle(center: screen, radius: radius);
-    canvas.drawCircle(screen, radius, Paint()..shader = gradient.createShader(rect));
+    canvas.drawCircle(
+        screen, radius, Paint()..shader = gradient.createShader(rect));
     canvas.drawCircle(
       screen + Offset(-radius * 0.28, -radius * 0.28),
       radius * 0.18,
