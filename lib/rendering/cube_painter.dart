@@ -84,9 +84,6 @@ class CubePainter extends CustomPainter {
 
   void _drawCell(Canvas canvas, Coordinate c, Vector3 viewDir, Offset center) {
     final block = cube.at(c);
-    final isTraveled = traveledPath.contains(c);
-    final isStart = c == kStart;
-    final isEnd = c == kEnd;
 
     // Compute screen positions of 8 corners
     final cx = c.x.toDouble();
@@ -120,15 +117,7 @@ class CubePainter extends CustomPainter {
 
       final brightness = 0.28 + normal.dot(viewDir) * 0.42;
       Color faceColor;
-      if (isStart) {
-        faceColor = Colors.lightGreenAccent.withOpacity(0.55);
-      } else if (isEnd) {
-        faceColor = Colors.amber.withOpacity(0.55);
-      } else if (isTraveled) {
-        faceColor = Colors.deepOrange.withOpacity(0.45);
-      } else {
-        faceColor = HSLColor.fromAHSL(0.68, 215, 0.55, brightness).toColor();
-      }
+      faceColor = HSLColor.fromAHSL(0.68, 215, 0.55, brightness).toColor();
 
       canvas.drawPath(path, Paint()..color = faceColor.withOpacity(0.38));
 
@@ -139,7 +128,7 @@ class CubePainter extends CustomPainter {
         _drawPipeOpening(
           canvas,
           fc,
-          isTraveled || isStart || isEnd,
+          false,
           block.connectionCount,
         );
       }

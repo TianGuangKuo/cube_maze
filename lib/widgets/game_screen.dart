@@ -222,8 +222,6 @@ class _AssemblySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final level = gameState.level;
-    final mainPath = level.assemblyPieces.where((p) => p.isMainPath).length;
-    final decoys = level.assemblyPieces.length - mainPath;
 
     return SafeArea(
       child: DraggableScrollableSheet(
@@ -273,8 +271,9 @@ class _AssemblySheet extends StatelessWidget {
                     icon: Icons.grid_4x4,
                     label: '管道模块 ${level.assemblyPieces.length} 个',
                   ),
-                  _InfoChip(icon: Icons.route, label: '主通路 $mainPath 个'),
-                  _InfoChip(icon: Icons.alt_route, label: '干扰 $decoys 个'),
+                  const _InfoChip(icon: Icons.category_outlined, label: '九种形式'),
+                  const _InfoChip(
+                      icon: Icons.view_in_ar_outlined, label: '4x4x4'),
                 ],
               ),
               const SizedBox(height: 22),
@@ -395,19 +394,11 @@ class _PieceRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isPath
-              ? Colors.lightGreenAccent.withOpacity(0.28)
-              : Colors.orangeAccent.withOpacity(0.20),
-        ),
+        border: Border.all(color: Colors.white12),
       ),
       child: Row(
         children: [
-          Icon(
-            isPath ? Icons.check_circle_outline : Icons.call_split,
-            color: isPath ? Colors.lightGreenAccent : Colors.orangeAccent,
-            size: 18,
-          ),
+          const Icon(Icons.toll_outlined, color: Colors.white54, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
